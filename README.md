@@ -9,16 +9,16 @@
 
 ## 📁 Cấu Trúc Dự Án
 
-```
+```text
 CTDL_GT/
 ├── include/
 │   └── utils.h                        # Hàm tiện ích dùng chung
 │
 ├── Chuong1_TongQuan/
-│   └── Chuong1_TongQuan.cpp           # Kiểu DL, CTDL, BigO
+│   └── Chuong1_TongQuan.cpp           # Kiểu DL, CTDL, Big-O
 │
 ├── Chuong2_TimKiem_SapXep/
-│   └── Chuong2_TimKiem_SapXep.cpp     # 2 TK + 5 sắp xếp
+│   └── Chuong2_TimKiem_SapXep.cpp     # 2 tìm kiếm + các thuật toán sắp xếp cơ bản
 │
 ├── Chuong3_DanhSachLienKet/
 │   └── Chuong3_DanhSachLienKet.cpp    # DSLK đơn, Stack, Queue
@@ -38,64 +38,66 @@ CTDL_GT/
 ## 📖 Nội Dung Từng File
 
 ### Chương 1 — Tổng Quan CTDL & GT
-- Kiểu dữ liệu C/C++, nguyên tắc chọn KDL
-- Minh họa mối liên hệ CTDL ↔ Giải thuật (bảng điểm)
-- 7 phân lớp độ phức tạp Big-O: O(K), O(log N), O(N), O(N log N), O(N²), O(N³), O(2ᴺ)
-- Bài tập: tính tổng chữ số, phương trình bậc nhất
+- Kiểu dữ liệu C/C++, nguyên tắc chọn kiểu dữ liệu
+- Minh họa mối liên hệ giữa cấu trúc dữ liệu và giải thuật
+- 7 phân lớp độ phức tạp Big-O: `O(1)`, `O(log N)`, `O(N)`, `O(N log N)`, `O(N²)`, `O(N³)`, `O(2^N)`
+- Bài tập minh họa: tính tổng chữ số, giải phương trình bậc nhất
 
 ### Chương 2 — Tìm Kiếm & Sắp Xếp
+
 | Giải thuật | Độ phức tạp | Ghi chú |
 |---|---|---|
-| Linear Search | O(N) | Không yêu cầu sắp xếp |
+| Linear Search | O(N) | Không yêu cầu mảng đã sắp xếp |
 | Binary Search | O(log N) | Cần mảng đã sắp xếp |
-| Selection Sort | O(N²) | Đơn giản |
+| Selection Sort | O(N²) | Dễ cài đặt |
 | Insertion Sort | O(N²) | Tốt với mảng gần sắp xếp |
-| Bubble Sort | O(N²) | Dễ hiểu |
-| Quick Sort | O(N log N) | Trung bình nhanh nhất |
-| Heap Sort | O(N log N) | Ổn định |
+| Bubble Sort | O(N²) | Dễ quan sát từng bước |
+| Quick Sort | O(N log N) | Trung bình rất nhanh |
+| Heap Sort | O(N log N) | Phù hợp khi cần hiệu năng ổn định |
 
 ### Chương 3 — Danh Sách Liên Kết
-- Con trỏ, biến động, biến con trỏ
-- DSLK đơn: tạo, xuất, thêm (đầu/cuối/sau/trước)
-- Xóa (đầu/cuối/bất kỳ), duyệt, sắp xếp
-- Nối/Tách danh sách
-- **Stack**: Push, Pop + ứng dụng kiểm tra ngoặc, đổi nhị phân
-- **Queue**: Enqueue, Dequeue + ứng dụng hàng đợi in ấn
+- Con trỏ, cấp phát động, node và liên kết
+- Danh sách liên kết đơn: tạo, duyệt, thêm, xóa
+- Các thao tác đầu/cuối/vị trí bất kỳ
+- Nối và tách danh sách
+- **Stack**: Push, Pop và ứng dụng kiểm tra ngoặc, đổi nhị phân
+- **Queue**: Enqueue, Dequeue và ứng dụng hàng chờ in ấn
 
 ### Chương 4 — Cây Nhị Phân
-- Cây nhị phân: lưu trữ bằng mảng và con trỏ
-- 3 phương pháp duyệt: Pre-order (NLR), In-order (LNR), Post-order (LRN)
+- Cây nhị phân: biểu diễn bằng mảng và con trỏ
+- Duyệt cây theo 3 thứ tự: Pre-order, In-order, Post-order
 - Duyệt theo mức (BFS)
-- **BST**: Insert, Search, Delete
-- Các thao tác: chiều cao, đếm nút, tổng, nút lớn thứ k
+- **Binary Search Tree (BST)**: Insert, Search, Delete
+- Các thao tác thường dùng: tính chiều cao, đếm nút, tính tổng, tìm nút lớn thứ `k`
 
 ### Bài Tập Tổng Hợp — 5 Ứng Dụng Thực Tế
 1. **Quản lý sinh viên** — mảng + sắp xếp + tìm kiếm
-2. **Lịch sử trình duyệt** — Stack (quay lại/tiến)
+2. **Lịch sử trình duyệt** — Stack (quay lại / tiến tới)
 3. **Hàng chờ in ấn** — Queue (FIFO)
-4. **Tính biểu thức hậu tố** — Stack (Postfix calculator)
-5. **Từ điển Anh-Việt** — BST (lưu trữ + tìm kiếm)
+4. **Tính biểu thức hậu tố** — Stack (Postfix Calculator)
+5. **Từ điển Anh-Việt** — BST (lưu trữ và tìm kiếm)
 
 ---
 
 ## ⚙️ Biên Dịch và Chạy
 
 ### Yêu cầu
-- Trình biên dịch: **g++ (C++17)** hoặc Visual Studio, Code::Blocks, Dev-C++
+- Trình biên dịch: **g++ (C++17)**
+- Hoặc có thể dùng: **Visual Studio**, **Code::Blocks**, **Dev-C++**
 
-### Biên dịch từng file (g++)
+### Biên dịch từng file bằng g++
 ```bash
-# Tạo thư mục bin
-mkdir bin
+# Tạo thư mục chứa file biên dịch
+mkdir -p bin
 
 # Biên dịch từng chương
-g++ -std=c++17 Chuong1_TongQuan/Chuong1_TongQuan.cpp -o bin/Chuong1
-g++ -std=c++17 Chuong2_TimKiem_SapXep/Chuong2_TimKiem_SapXep.cpp -o bin/Chuong2
-g++ -std=c++17 Chuong3_DanhSachLienKet/Chuong3_DanhSachLienKet.cpp -o bin/Chuong3 -lm
-g++ -std=c++17 Chuong4_CauTrucCay/Chuong4_CauTrucCay.cpp -o bin/Chuong4
-g++ -std=c++17 BaiTapTongHop/BaiTapTongHop.cpp -o bin/TongHop
+ g++ -std=c++17 Chuong1_TongQuan/Chuong1_TongQuan.cpp -o bin/Chuong1
+ g++ -std=c++17 Chuong2_TimKiem_SapXep/Chuong2_TimKiem_SapXep.cpp -o bin/Chuong2
+ g++ -std=c++17 Chuong3_DanhSachLienKet/Chuong3_DanhSachLienKet.cpp -o bin/Chuong3 -lm
+ g++ -std=c++17 Chuong4_CauTrucCay/Chuong4_CauTrucCay.cpp -o bin/Chuong4
+ g++ -std=c++17 BaiTapTongHop/BaiTapTongHop.cpp -o bin/TongHop
 
-# Chạy
+# Chạy chương trình
 ./bin/Chuong1
 ./bin/Chuong2
 ./bin/Chuong3
@@ -110,15 +112,217 @@ make clean  # Xóa file đã build
 ```
 
 ### Dùng IDE (Visual Studio / Code::Blocks)
-1. Mở từng file `.cpp`
-2. Chọn **Build & Run** (F9 hoặc F5)
+1. Mở file `.cpp` cần chạy
+2. Chọn **Build** hoặc **Build & Run**
+3. Quan sát kết quả trong cửa sổ terminal / console
+
+---
+
+## 📌 Hướng Dẫn Fork, Làm Bài và Nộp Bài
+
+Phần này dành cho sinh viên mới bắt đầu học GitHub và Git. Mục tiêu là giúp sinh viên biết cách tạo repo riêng, làm bài trên máy cá nhân và nộp bài đúng cách.
+
+### 1. Fork là gì?
+
+**Fork** là tạo một bản sao của repo gốc về tài khoản GitHub cá nhân của mình.
+
+Ví dụ:
+- Repo gốc của giảng viên: `https://github.com/CocAgent/DSALab`
+- Repo sau khi sinh viên fork: `https://github.com/nguyenvana/DSALab`
+
+Sinh viên sẽ làm bài trên repo của mình, không làm trực tiếp trên repo gốc.
+
+### 2. Sinh viên cần làm gì đầu tiên?
+
+1. Truy cập repo gốc:  
+   **https://github.com/CocAgent/DSALab**
+2. Nhấn nút **Fork** ở góc trên bên phải
+3. Chọn tài khoản GitHub cá nhân
+4. Nhấn **Create fork**
+
+Sau bước này, sinh viên sẽ có một repo riêng của mình trên GitHub.
+
+### 3. Clone là gì?
+
+**Clone** là tải repo từ GitHub về máy tính cá nhân để bắt đầu làm bài.
+
+Ví dụ:
+
+```bash
+git clone https://github.com/nguyenvana/DSALab.git
+cd DSALab
+```
+
+Giải thích:
+- `git clone ...` : tải repo về máy
+- `cd DSALab` : đi vào thư mục dự án
+
+### 4. Commit là gì?
+
+**Commit** là ghi lại một mốc thay đổi của bài làm.
+
+Ví dụ, sau khi sinh viên sửa code xong, dùng lệnh:
+
+```bash
+git add .
+git commit -m "Hoan thanh bai tap tuan 1"
+```
+
+Giải thích:
+- `git add .` : chọn các file đã thay đổi để chuẩn bị lưu
+- `git commit -m "..."` : lưu lại thay đổi và đặt tên cho lần cập nhật đó
+
+Nên viết nội dung commit rõ ràng, ví dụ:
+- `Hoan thanh bai tap tuan 1`
+- `Sua loi bai tim kiem nhi phan`
+- `Bo sung bai tap Linked List`
+
+Không nên viết quá chung chung như:
+- `update`
+- `fix`
+- `123`
+
+### 5. Push là gì?
+
+**Push** là đưa bài làm từ máy tính cá nhân lên GitHub.
+
+Ví dụ:
+
+```bash
+git push origin main
+```
+
+Lệnh này giúp cập nhật bài làm mới nhất của sinh viên lên repo GitHub cá nhân.
+
+### 6. Ví dụ đầy đủ từ đầu đến cuối
+
+```bash
+git clone https://github.com/nguyenvana/DSALab.git
+cd DSALab
+git add .
+git commit -m "Hoan thanh bai tap tuan 1"
+git push origin main
+```
+
+Ý nghĩa của cả quy trình trên:
+- tải repo về máy
+- vào thư mục dự án
+- thêm các file đã sửa
+- lưu lại lần cập nhật
+- đẩy bài lên GitHub
+
+### 7. Sinh viên nộp bài cho giảng viên bằng cách nào?
+
+Có hai cách phổ biến.
+
+#### Cách 1: Nộp bằng Pull Request
+
+**Pull Request (PR)** là cách gửi bài từ repo cá nhân về repo gốc để giảng viên xem và nhận xét.
+
+Ưu điểm:
+- Giảng viên xem được toàn bộ phần thay đổi
+- Có thể nhận xét trực tiếp trên từng dòng code
+- Dễ theo dõi quá trình sửa bài
+
+Nếu nộp bằng Pull Request, sinh viên cần đặt tiêu đề theo mẫu thống nhất:
+
+```text
+[MSSV] - [Ho ten] - Bai tap tuan X
+```
+
+Ví dụ:
+
+```text
+[22010456] - Nguyen Van A - Bai tap tuan 1
+[22010888] - Tran Thi B - Bai tap tuan 2
+```
+
+Giải thích:
+- `MSSV` = mã số sinh viên
+- `Ho ten` = họ và tên sinh viên
+- `Bai tap tuan X` = bài tập của tuần tương ứng
+
+#### Cách 2: Nộp bằng link repo đã fork
+
+Nếu không dùng Pull Request, sinh viên có thể gửi đường link repo GitHub cá nhân qua:
+- Moodle
+- Google Classroom
+- Google Form
+- Microsoft Teams
+
+Ví dụ:
+
+```text
+https://github.com/nguyenvana/DSALab
+```
+
+Cách này đơn giản, nhưng giảng viên sẽ khó nhận xét chi tiết trên từng dòng code hơn so với Pull Request.
+
+### 8. Một số lưu ý quan trọng cho sinh viên
+
+- Chỉ làm việc trên repo đã fork của mình
+- Không push trực tiếp vào repo gốc của giảng viên
+- Đặt commit message rõ ràng
+- Nếu nộp bằng Pull Request, đặt tiêu đề đúng mẫu
+- Chỉ push các file cần thiết như `.cpp`, `.c`, `.h`, `README.md` khi được yêu cầu
+- Không push các file không cần thiết như `.exe`, `bin/`, `build/`, `obj/`, `.vscode/`
+
+### 9. Mẫu hướng dẫn ngắn gửi cho sinh viên
+
+```text
+Huong dan nop bai DSALab
+
+1. Vao repo goc:
+   https://github.com/CocAgent/DSALab
+
+2. Nhan Fork de tao repo rieng
+
+3. Clone repo fork ve may:
+   git clone https://github.com/nguyenvana/DSALab.git
+   cd DSALab
+
+4. Lam bai dung thu muc duoc yeu cau
+
+5. Day bai len GitHub ca nhan bang cac lenh:
+   git add .
+   git commit -m "Hoan thanh bai tap tuan 1"
+   git push origin main
+
+6. Nop bai bang mot trong hai cach:
+   - Tao Pull Request ve repo goc
+   - Hoac gui link repo fork len he thong hoc tap
+
+Neu nop bang Pull Request, dat tieu de theo mau:
+[MSSV] - [Ho ten] - Bai tap tuan X
+```
+
+### 10. Gợi ý cho giảng viên
+
+Để quản lý bài tập hiệu quả hơn, giảng viên nên:
+- quy định rõ cấu trúc thư mục nộp bài
+- thống nhất mẫu tiêu đề Pull Request
+- yêu cầu commit message rõ ràng
+- thêm file `.gitignore` để tránh sinh viên push file rác
+- cân nhắc dùng **GitHub Classroom** nếu số lượng sinh viên lớn
+
+Ví dụ `.gitignore` cơ bản:
+
+```gitignore
+bin/
+build/
+obj/
+*.exe
+*.out
+.vscode/
+.idea/
+```
 
 ---
 
 ## 📝 Ghi Chú
 - Tất cả code sử dụng **tiếng Việt không dấu** trong tên hàm/biến để tránh lỗi encoding
 - Mỗi file có thể biên dịch **độc lập**, không phụ thuộc nhau
-- Các hàm đặt tên theo phong cách **giáo trình** (HoanVi, ThemDau, XoaCuoi, ...)
+- Các hàm đặt tên theo phong cách **giáo trình** (`HoanVi`, `ThemDau`, `XoaCuoi`, ...)
 
 ---
 
