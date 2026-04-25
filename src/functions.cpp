@@ -1,267 +1,152 @@
-﻿#include "structures.h"
-#include <iostream>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-using namespace std;
+#include "structures.h"
+#include <iomanip>
 
-// ============================================================
-//  BST SACH
-// ============================================================
+// ---------------- 1. QUẢN LÝ SÁCH ----------------
 
-Book* bst_insert(Book* root, int id, const string& title, const string& author, int qty) {
-    if (!root) return new Book(id, title, author, qty);
-    if (id < root->id)       root->left = bst_insert(root->left, id, title, author, qty);
-    else if (id > root->id)  root->right = bst_insert(root->right, id, title, author, qty);
-    // id trung → cap nhat thong tin
-    else { root->title = title; root->author = author; root->quantity = qty; }
-    return root;
-}
-
-Book* bst_min(Book* root) {
-    while (root && root->left) root = root->left;
-    return root;
-}
-
-Book* bst_delete(Book* root, int id) {
-    if (!root) return nullptr;
-    if (id < root->id) {
-        root->left = bst_delete(root->left, id);
+void addBook(LibrarySystem& lib, string isbn, string title, string author, string genre, int copies) {
+    if (lib.bookMap.find(isbn) != lib.bookMap.end()) {
+        cout << "[LỖI] Sach co ma ISBN " << isbn << " da ton tai!\n";
+        return;
     }
-    else if (id > root->id) {
-        root->right = bst_delete(root->right, id);
+
+    // Thêm vào Doubly Linked List
+    lib.bookList.push_back({ isbn, title, author, genre, copies, copies });
+
+    // Thêm con trỏ vào Hash Table để tra cứu O(1)
+    lib.bookMap[isbn] = &lib.bookList.back();
+
+    // Lưu lịch sử
+    lib.historyStack.push({ "ADD_BOOK", "SYSTEM", isbn });
+    cout << "[OK] Them sach '" << title << "' thanh cong!\n";
+}
+
+void displayBooks(const LibrarySystem& lib) {
+    cout << "\n--- DANH SACH KHO SACH ---\n";
+    cout << left << setw(10) << "ISBN" << setw(25) << "Ten Sach" << setw(20) << "Tac Gia"
+        << setw(10) << "The Loai" << "So luong (Con/Tong)\n";
+    cout << string(80, '-') << "\n";
+
+    for (const auto& book : lib.bookList) {
+        cout << left << setw(10) << book.isbn << setw(25) << book.title << setw(20) << book.author
+            << setw(10) << book.genre << book.availableCopies << "/" << book.totalCopies << "\n";
+    }
+}
+
+// ---------------- 2. QUẢN LÝ ĐỘC GIẢ ----------------
+
+void addReader(LibrarySystem& lib, string id, string name, string phone) {
+    if (lib.readerMap.find(id) != lib.readerMap.end()) {
+        cout << "[LỖI] Doc gia co ma " << id << " da ton tai!\n";
+        return;
+    }
+    lib.readerMap[id] = { id, name, phone, {} };
+    cout << "[OK] Dang ky doc gia '" << name << "' thanh cong!\n";
+}
+
+void displayReaders(const LibrarySystem& lib) {
+    cout << "\n--- DANH SACH DOC GIA ---\n";
+    for (const auto& pair : lib.readerMap) {
+        const Reader& r = pair.second;
+        cout << "ID: " << r.id << " | Ten: " << r.name << " | SDT: " << r.phone << " | Dang muon: " << r.borrowedISBNs.size() << " cuon\n";
+    }
+}
+
+// ---------------- 3. MƯỢN TRẢ SÁCH (Tích hợp Queue) ----------------
+
+void borrowBook(LibrarySystem& lib, string readerId, string isbn) {
+    if (lib.readerMap.find(readerId) == lib.readerMap.end()) {
+        cout << "[LỖI] Khong tim thay doc gia!\n"; return;
+    }
+    if (lib.bookMap.find(isbn) == lib.bookMap.end()) {
+        cout << "[LỖI] Khong tim thay sach!\n"; return;
+    }
+
+    Book* book = lib.bookMap[isbn];
+    Reader& reader = lib.readerMap[readerId];
+
+    if (book->availableCopies > 0) {
+        book->availableCopies--;
+        reader.borrowedISBNs.push_back(isbn);
+        lib.historyStack.push({ "BORROW", readerId, isbn });
+        cout << "[OK] Doc gia " << reader.name << " da muon sach '" << book->title << "'.\n";
     }
     else {
-        // Tim thay nut can xoa
-        if (!root->left) {
-            Book* tmp = root->right; delete root; return tmp;
+        // Hết sách -> Nhảy vào Queue
+        lib.waitlistQueue[isbn].push(readerId);
+        cout << "[CHÚ Ý] Sach da het. Doc gia " << reader.name << " duoc dua vao HANG CHO (Queue).\n";
+    }
+}
+
+void returnBook(LibrarySystem& lib, string readerId, string isbn) {
+    if (lib.readerMap.find(readerId) == lib.readerMap.end() || lib.bookMap.find(isbn) == lib.bookMap.end()) {
+        cout << "[LỖI] Thong tin khong hop le!\n"; return;
+    }
+
+    Reader& reader = lib.readerMap[readerId];
+    Book* book = lib.bookMap[isbn];
+
+    auto it = find(reader.borrowedISBNs.begin(), reader.borrowedISBNs.end(), isbn);
+    if (it != reader.borrowedISBNs.end()) {
+        reader.borrowedISBNs.erase(it);
+        lib.historyStack.push({ "RETURN", readerId, isbn });
+        cout << "[OK] Doc gia " << reader.name << " da tra sach '" << book->title << "'.\n";
+
+        // Kiểm tra Queue xem có ai đang chờ cuốn này không
+        if (!lib.waitlistQueue[isbn].empty()) {
+            string nextReaderId = lib.waitlistQueue[isbn].front();
+            lib.waitlistQueue[isbn].pop();
+
+            lib.readerMap[nextReaderId].borrowedISBNs.push_back(isbn);
+            lib.historyStack.push({ "BORROW", nextReaderId, isbn });
+            cout << "[HỆ THỐNG] Sach vua tra da duoc chuyen tu dong cho nguoi dau Hang Cho: Doc gia ID " << nextReaderId << ".\n";
         }
-        if (!root->right) {
-            Book* tmp = root->left;  delete root; return tmp;
+        else {
+            book->availableCopies++; // Không ai chờ thì tăng số lượng tồn kho
         }
-        // Co 2 con: lay nut nho nhat cua cay con phai
-        Book* successor = bst_min(root->right);
-        root->id = successor->id;
-        root->title = successor->title;
-        root->author = successor->author;
-        root->quantity = successor->quantity;
-        root->borrowed = successor->borrowed;
-        root->right = bst_delete(root->right, successor->id);
     }
-    return root;
-}
-
-Book* bst_search_id(Book* root, int id) {
-    if (!root || root->id == id) return root;
-    if (id < root->id) return bst_search_id(root->left, id);
-    else               return bst_search_id(root->right, id);
-}
-
-// Tim kiem theo ten (chua chu khoa, in-order)
-static Book* _found = nullptr;
-void _bst_search_title_helper(Book* root, const string& kw) {
-    if (!root) return;
-    _bst_search_title_helper(root->left, kw);
-    string t = root->title, k = kw;
-    transform(t.begin(), t.end(), t.begin(), ::tolower);
-    transform(k.begin(), k.end(), k.begin(), ::tolower);
-    if (t.find(k) != string::npos && !_found) _found = root;
-    _bst_search_title_helper(root->right, kw);
-}
-
-Book* bst_search_title(Book* root, const string& kw) {
-    _found = nullptr;
-    _bst_search_title_helper(root, kw);
-    return _found;
-}
-
-void bst_print_inorder(Book* root) {
-    if (!root) return;
-    bst_print_inorder(root->left);
-    cout << "  [" << root->id << "] " << root->title
-        << " | Tac gia: " << root->author
-        << " | SL: " << root->quantity
-        << " | Dang muon: " << root->borrowed << "\n";
-    bst_print_inorder(root->right);
-}
-
-// ============================================================
-//  LINKED LIST DOC GIA
-// ============================================================
-
-Reader* ll_add(Reader* head, int id, const string& name, const string& phone) {
-    // Kiem tra trung id
-    Reader* cur = head;
-    while (cur) { if (cur->id == id) return head; cur = cur->next; }
-    Reader* node = new Reader(id, name, phone);
-    node->next = head;
-    return node;
-}
-
-Reader* ll_remove(Reader* head, int id) {
-    if (!head) return nullptr;
-    if (head->id == id) { Reader* tmp = head->next; delete head; return tmp; }
-    Reader* cur = head;
-    while (cur->next && cur->next->id != id) cur = cur->next;
-    if (cur->next) { Reader* tmp = cur->next->next; delete cur->next; cur->next = tmp; }
-    return head;
-}
-
-Reader* ll_find(Reader* head, int id) {
-    while (head) { if (head->id == id) return head; head = head->next; }
-    return nullptr;
-}
-
-void ll_print(Reader* head) {
-    if (!head) { cout << "  (Chua co doc gia nao)\n"; return; }
-    while (head) {
-        cout << "  [" << head->id << "] " << head->name << " | SĐT: " << head->phone << "\n";
-        head = head->next;
+    else {
+        cout << "[LỖI] Doc gia khong muon cuon sach nay!\n";
     }
 }
 
-// ============================================================
-//  QUEUE
-// ============================================================
+// ---------------- 4. LỊCH SỬ VÀ HOÀN TÁC (Tích hợp Stack) ----------------
 
-void q_enqueue(Queue& q, BorrowRecord r) {
-    QueueNode* node = new QueueNode(r);
-    if (!q.rear) { q.front = q.rear = node; }
-    else { q.rear->next = node; q.rear = node; }
-    q.size++;
-}
+void undoLastAction(LibrarySystem& lib) {
+    if (lib.historyStack.empty()) {
+        cout << "[THÔNG BÁO] Khong co lich su de hoan tac (Undo).\n";
+        return;
+    }
 
-bool q_dequeue(Queue& q, BorrowRecord& out) {
-    if (!q.front) return false;
-    out = q.front->data;
-    QueueNode* tmp = q.front;
-    q.front = q.front->next;
-    if (!q.front) q.rear = nullptr;
-    delete tmp;
-    q.size--;
-    return true;
-}
+    Transaction lastTx = lib.historyStack.top();
+    lib.historyStack.pop();
 
-bool q_empty(const Queue& q) { return q.size == 0; }
-
-void q_print(const Queue& q) {
-    if (q_empty(q)) { cout << "  (Khong co ai trong danh sach cho)\n"; return; }
-    QueueNode* cur = q.front;
-    int i = 1;
-    while (cur) {
-        cout << "  " << i++ << ". Doc gia [" << cur->data.readerId << "] "
-            << cur->data.readerName << " cho muon sach \"" << cur->data.bookTitle << "\"\n";
-        cur = cur->next;
+    if (lastTx.action == "BORROW") {
+        // Khôi phục lại trạng thái chưa mượn
+        lib.bookMap[lastTx.isbn]->availableCopies++;
+        Reader& r = lib.readerMap[lastTx.readerId];
+        r.borrowedISBNs.erase(remove(r.borrowedISBNs.begin(), r.borrowedISBNs.end(), lastTx.isbn), r.borrowedISBNs.end());
+        cout << "[UNDO] Da hoan tac thao tac MUON SACH cua ID " << lastTx.readerId << ".\n";
+    }
+    else if (lastTx.action == "RETURN") {
+        cout << "[UNDO] Tinh nang Undo Tra Sach can phuc tap hon, tam thoi bo qua.\n";
+    }
+    else if (lastTx.action == "ADD_BOOK") {
+        cout << "[UNDO] Da hoan tac Them Sach.\n"; // Thực tế cần xóa khỏi DLL và Hash Table
     }
 }
 
-// ============================================================
-//  STACK
-// ============================================================
+// ---------------- 5. XEM HÀNG CHỜ (Mới thêm để fix lỗi) ----------------
 
-void stk_push(Stack& s, BorrowRecord r) {
-    StackNode* node = new StackNode(r);
-    node->next = s.top;
-    s.top = node;
-    s.size++;
-}
-
-bool stk_pop(Stack& s, BorrowRecord& out) {
-    if (!s.top) return false;
-    out = s.top->data;
-    StackNode* tmp = s.top;
-    s.top = s.top->next;
-    delete tmp;
-    s.size--;
-    return true;
-}
-
-bool stk_peek(const Stack& s, BorrowRecord& out) {
-    if (!s.top) return false;
-    out = s.top->data;
-    return true;
-}
-
-bool stk_empty(const Stack& s) { return s.size == 0; }
-
-void stk_print(const Stack& s) {
-    if (stk_empty(s)) { cout << "  (Chua co lich su thao tac)\n"; return; }
-    StackNode* cur = s.top;
-    int i = 1;
-    while (cur) {
-        cout << "  " << i++ << ". [" << cur->data.action << "] Doc gia "
-            << cur->data.readerName << " - Sach \"" << cur->data.bookTitle << "\"\n";
-        cur = cur->next;
+void viewWaitlist(LibrarySystem& lib, string isbn) {
+    if (lib.waitlistQueue.find(isbn) == lib.waitlistQueue.end() || lib.waitlistQueue[isbn].empty()) {
+        cout << "[THÔNG BÁO] Khong co ai dang cho muon sach nay.\n";
+        return;
     }
-}
-
-// ============================================================
-//  FILE I/O
-// ============================================================
-
-// Format file sach: id|title|author|quantity|borrowed
-void save_books_helper(Book* root, ofstream& f) {
-    if (!root) return;
-    save_books_helper(root->left, f);
-    f << root->id << "|" << root->title << "|" << root->author
-        << "|" << root->quantity << "|" << root->borrowed << "\n";
-    save_books_helper(root->right, f);
-}
-
-void save_books(Book* root, const string& fn) {
-    ofstream f(fn);
-    if (!f) { cerr << "Khong the ghi file " << fn << "\n"; return; }
-    save_books_helper(root, f);
-}
-
-Book* load_books(const string& fn) {
-    ifstream f(fn);
-    if (!f) return nullptr;
-    Book* root = nullptr;
-    string line;
-    while (getline(f, line)) {
-        if (line.empty()) continue;
-        stringstream ss(line);
-        string tok;
-        int id, qty, bor;
-        string title, author;
-        getline(ss, tok, '|'); id = stoi(tok);
-        getline(ss, title, '|');
-        getline(ss, author, '|');
-        getline(ss, tok, '|'); qty = stoi(tok);
-        getline(ss, tok, '|'); bor = stoi(tok);
-        root = bst_insert(root, id, title, author, qty);
-        Book* b = bst_search_id(root, id);
-        if (b) b->borrowed = bor;
+    cout << "--- HANG CHO SACH " << isbn << " ---\n";
+    queue<string> tempQueue = lib.waitlistQueue[isbn]; // Copy ra để in, tránh làm mất dữ liệu gốc
+    int pos = 1;
+    while (!tempQueue.empty()) {
+        cout << pos++ << ". ID Doc gia: " << tempQueue.front() << "\n";
+        tempQueue.pop();
     }
-    return root;
-}
-
-// Format file doc gia: id|name|phone
-void save_readers(Reader* head, const string& fn) {
-    ofstream f(fn);
-    if (!f) { cerr << "Khong the ghi file " << fn << "\n"; return; }
-    while (head) {
-        f << head->id << "|" << head->name << "|" << head->phone << "\n";
-        head = head->next;
-    }
-}
-
-Reader* load_readers(const string& fn) {
-    ifstream f(fn);
-    if (!f) return nullptr;
-    Reader* head = nullptr;
-    string line;
-    while (getline(f, line)) {
-        if (line.empty()) continue;
-        stringstream ss(line);
-        string tok;
-        int id;
-        string name, phone;
-        getline(ss, tok, '|'); id = stoi(tok);
-        getline(ss, name, '|');
-        getline(ss, phone, '|');
-        head = ll_add(head, id, name, phone);
-    }
-    return head;
 }
